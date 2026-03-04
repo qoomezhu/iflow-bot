@@ -9,6 +9,9 @@ from loguru import logger
 
 from iflow_bot.config.schema import Config
 
+LEGACY_DEFAULT_TIMEOUT = 300
+NEW_DEFAULT_TIMEOUT = 1200
+
 
 def get_config_dir() -> Path:
     """Get the configuration directory."""
@@ -53,6 +56,12 @@ def load_config(config_path: Optional[Path] = None, auto_create: bool = True) ->
         try:
             with open(config_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
+            data, migrated = _migrate_legacy_driver_timeout(data)
+            if migrated:
+                _save_raw_config_data(data, config_path)
+                logger.info(
+                    f"Migrated config timeout to {NEW_DEFAULT_TIMEOUT}s for existing install: {config_path}"
+                )
             config = Config(**data)
             logger.info(f"Loaded config from {config_path}")
             return config
@@ -69,6 +78,37 @@ def load_config(config_path: Optional[Path] = None, auto_create: bool = True) ->
     return Config()
 
 
+def _migrate_legacy_driver_timeout(data: dict) -> tuple[dict, bool]:
+    """Migrate legacy default timeout to new default for upgraded users.
+
+    Rules:
+    - If `driver.timeout` is missing, set it to NEW_DEFAULT_TIMEOUT.
+    - If `driver.timeout` equals legacy default 300 (int or string), set to 1200.
+    - Keep all other custom timeout values unchanged.
+    """
+    migrated = False
+    driver = data.get("driver")
+    if not isinstance(driver, dict):
+        return data, migrated
+
+    timeout = driver.get("timeout")
+    if timeout is None:
+        driver["timeout"] = NEW_DEFAULT_TIMEOUT
+        migrated = True
+    elif timeout == LEGACY_DEFAULT_TIMEOUT or timeout == str(LEGACY_DEFAULT_TIMEOUT):
+        driver["timeout"] = NEW_DEFAULT_TIMEOUT
+        migrated = True
+
+    return data, migrated
+
+
+def _save_raw_config_data(data: dict, config_path: Path) -> None:
+    """Persist raw config dictionary to disk."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
 def _create_default_config(config_path: Path) -> None:
     """创建默认配置文件。"""
     config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -82,7 +122,7 @@ def _create_default_config(config_path: Path) -> None:
             "yolo": True,
             "thinking": False,
             "max_turns": 40,
-            "timeout": 300,
+            "timeout": 1200,
             "compression_trigger_tokens": 88888,
             "workspace": str(Path.home() / ".iflow-bot" / "workspace"),
             "extra_args": []

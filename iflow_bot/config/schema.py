@@ -164,7 +164,7 @@ class DriverConfig(BaseModel):
     yolo: bool = True
     thinking: bool = False
     max_turns: int = 40
-    timeout: int = 300
+    timeout: int = 1200
     compression_trigger_tokens: int = 88888
     """活跃会话自动压缩触发阈值（估算 token）"""
     workspace: str = ""  # 关键：iflow 工作目录
@@ -236,4 +236,4 @@ class Config(BaseSettings):
         """获取超时时间。"""
         if self.driver and self.driver.timeout:
             return self.driver.timeout
-        return 300
+        return 1200

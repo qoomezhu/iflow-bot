@@ -150,7 +150,7 @@ uv run iflow-bot gateway start
     "yolo": true,
     "thinking": false,
     "max_turns": 40,
-    "timeout": 300,
+    "timeout": 1200,
     "workspace": "~/.iflow-bot/workspace",
     "extra_args": []
   },
@@ -242,7 +242,7 @@ uv run iflow-bot gateway start
 | `yolo` | bool | `true` | 自动确认模式 |
 | `thinking` | bool | `false` | 显示 AI 思考过程 |
 | `max_turns` | int | `40` | 单次最大对话轮次 |
-| `timeout` | int | `300` | 超时时间（秒） |
+| `timeout` | int | `1200` | 超时时间（秒） |
 | `workspace` | string | `~/.iflow-bot/workspace` | 工作空间路径 |
 | `extra_args` | list | `[]` | 额外的 iflow 参数 |
 | `acp_port` | int | `8090` | ACP 模式下的端口号 |

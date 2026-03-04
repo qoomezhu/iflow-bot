@@ -23,6 +23,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+import re
 from typing import Optional
 
 import typer
@@ -31,8 +32,33 @@ from rich.table import Table
 
 console = Console()
 
-__version__ = "0.3.2"
 __logo__ = "🤖"
+
+
+def _read_version_from_pyproject() -> str:
+    """Read project version from pyproject.toml."""
+    pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    try:
+        content = pyproject.read_text(encoding="utf-8")
+    except Exception:
+        return "0.0.0"
+
+    in_project_section = False
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        if line.startswith("[") and line.endswith("]"):
+            in_project_section = line == "[project]"
+            continue
+        if not in_project_section:
+            continue
+        match = re.match(r'^version\s*=\s*"([^"]+)"\s*$', line)
+        if match:
+            return match.group(1)
+
+    return "0.0.0"
+
+
+__version__ = _read_version_from_pyproject()
 
 
 def is_windows() -> bool:
@@ -1197,7 +1223,7 @@ def onboard(
             "yolo": True,
             "thinking": False,
             "max_turns": 40,
-            "timeout": 300,
+            "timeout": 1200,
             "compression_trigger_tokens": 88888,
             "workspace": str(Path.home() / ".iflow-bot" / "workspace"),
             "extra_args": []

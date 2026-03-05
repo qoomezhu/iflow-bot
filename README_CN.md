@@ -135,6 +135,27 @@ uv run iflow-bot gateway run
 uv run iflow-bot gateway start
 ```
 
+## 🐳 Docker 部署
+
+```bash
+# 构建镜像
+docker build -t iflow-bot:latest .
+
+# 准备宿主机配置文件
+mkdir -p ./config
+cp config/config.example.json ./config/config.json
+```
+
+然后编辑 `./config/config.json`，按需启用渠道并填写 token。
+
+```bash
+# 使用 docker compose 启动
+docker compose up -d
+
+# 查看日志
+docker compose logs -f iflow-bot
+```
+
 ## ⚙️ 配置说明
 
 配置文件位于 `~/.iflow-bot/config.json`

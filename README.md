@@ -135,6 +135,27 @@ uv run iflow-bot gateway run
 uv run iflow-bot gateway start
 ```
 
+## 🐳 Docker Deployment
+
+```bash
+# Build image
+docker build -t iflow-bot:latest .
+
+# Prepare host config file
+mkdir -p ./config
+cp config/config.example.json ./config/config.json
+```
+
+Then edit `./config/config.json` to enable channels and tokens.
+
+```bash
+# Start with docker compose
+docker compose up -d
+
+# View logs
+docker compose logs -f iflow-bot
+```
+
 ## ⚙️ Configuration
 
 Configuration file located at `~/.iflow-bot/config.json`

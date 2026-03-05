@@ -27,14 +27,12 @@ RUN pip install --no-cache-dir uv
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files first (for layer caching)
-COPY pyproject.toml uv.lock ./
-
-# Install Python dependencies
-RUN uv sync --frozen --no-dev 2>/dev/null || pip install --no-cache-dir .
-
-# Copy application source
+# Copy project metadata and source
+COPY pyproject.toml README.md ./
 COPY iflow_bot/ ./iflow_bot/
+
+# Install Python package and dependencies into system environment
+RUN uv pip install --system --no-cache .
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
